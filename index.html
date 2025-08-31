@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Control de Licitaciones - Google Sheets</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            color: #2d3748;
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            padding: 25px;
+            margin-bottom: 20px;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        h1 {
+            color: #2b6cb0;
+            margin-bottom: 15px;
+            font-size: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        h1 i {
+            margin-right: 12px;
+            font-size: 32px;
+        }
+        
+        .description {
+            color: #4a5568;
+            font-size: 16px;
+            line-height: 1.4;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .card-title {
+            font-size: 18px;
+            color: #2b6cb0;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .card-title i {
+            margin-right: 10px;
+            font-size: 22px;
+        }
+        
+        .filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .filter-group {
+            flex: 1;
+            min-width: 250px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #4a5568;
+            font-size: 14px;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: #4299e1;
+            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.2);
+        }
+        
+        button {
+            background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 14px 20px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 6px rgba(66, 153, 225, 0.3);
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(66, 153, 225, 0.4);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        button i {
+            margin-right: 8px;
+        }
+        
+        .button-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e0 100%);
+            color: #4a5568;
+        }
+        
+        .btn-download {
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            margin-top: 15px;
+        }
+        
+        .table-container {
+            overflow-x: auto;
+            margin-top: 25px;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.04);
+            max-height: 65vh;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 1000px;
+            font-size: 14px;
+        }
+        
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        th {
+            background-color: #4299e1;
+            color: white;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+            white-space: nowrap;
+        }
+        
+        tr:nth-child(even) {
+            background-color: #f7fafc;
+        }
+        
+        tr:hover {
+            background-color: #ebf4ff;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #4a5568;
+        }
+        
+        .loading i {
+            animation: spin 1.5s linear infinite;
+            font-size: 32px;
+            margin-bottom: 15px;
+            color: #4299e1;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .error {
+            text-align: center;
+            padding: 25px;
+            color: #e53e3e;
+            background-color: #fed7d7;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
+        .status {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #ebf4ff;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 500;
+        }
+        
+        .status > div {
+            display: flex;
+            justify-content: space-between;
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        .status .total {
+            color: #2b6cb0;
+        }
+        
+        .status .filtered {
+            color: #4a5568;
+        }
+        
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 25px;
+            gap: 15px;
+        }
+        
+        .pagination button {
+            width: auto;
+            padding: 10px 18px;
+        }
+        
+        .pagination-info {
+            font-size: 15px;
+            color: #4a5568;
+            font-weight: 500;
+        }
+        
+        .instructions {
+            background: linear-gradient(135deg, #ebf4ff 0%, #c3dafe 100%);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 25px 0;
+            border-left: 5px solid #4299e1;
+        }
+        
+        .instructions h3 {
+            margin-bottom: 15px;
+            color: #2b6cb0;
+            display: flex;
+            align-items: center;
+            font-size: 18px;
+        }
+        
+        .instructions h3 i {
+            margin-right: 10px;
+        }
+        
+        .sheet-info {
+            background-color: #f8fafc;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 25px;
+            border-left: 5px solid #48bb78;
+        }
+        
+        .sheet-info h3 {
+            color: #2f855a;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            font-size: 18px;
+        }
+        
+        .sheet-info h3 i {
+            margin-right: 10px;
+        }
+        
+        .mobile-notice {
+            display: block;
+            text-align: center;
+            font-size: 15px;
+            color: #4a5568;
+            margin-top: 15px;
+            padding: 12px;
+            background-color: #ebf4ff;
+            border-radius: 8px;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            
+            h1 {
+                font-size: 24px;
+            }
+            
+            .filters {
+                flex-direction: column;
+            }
+            
+            .button-group {
+                flex-direction: column;
+            }
+            
+            button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="material-icons">assessment</i> Control de Licitaciones</h1>
+            <p class="description">Sistema de visualización y filtrado de datos de licitaciones conectado directamente a Google Sheets</p>
+        </header>
+        
+        <div class="instructions">
+            <h3><i class="material-icons">info</i> Instrucciones de uso</h3>
+            <p>Utiliza los filtros para buscar información específica. Los datos se cargan directamente desde tu Google Sheets en tiempo real.</p>
+        </div>
+        
+        <div class="sheet-info">
+            <h3><i class="material-icons">link</i> Conexión con Google Sheets</h3>
+            <p>Conectado a: <strong>Control de Licitaciones 2022-2025</strong><br>
+            URL: <a href="https://docs.google.com/spreadsheets/d/1SNlBb3RyV2peSJWMMSycGOFLFF_jXnY9pTWKCw0_IwM/edit#gid=918715405" target="_blank">https://docs.google.com/spreadsheets/d/1SNlBb3RyV2peSJWMMSycGOFLFF_jXnY9pTWKCw0_IwM/edit#gid=918715405</a></p>
+        </div>
+        
+        <div class="card">
+            <div class="card-title"><i class="material-icons">filter_list</i> Filtros de Búsqueda</div>
+            
+            <div class="filters">
+                <div class="filter-group">
+                    <label for="idFilter">ID de Licitación:</label>
+                    <input type="text" id="idFilter" placeholder="Ej: 2215-69-LQ23">
+                </div>
+                
+                <div class="filter-group">
+                    <label for="proveedorFilter">Proveedor:</label>
+                    <input type="text" id="proveedorFilter" placeholder="Ej: UPDOWN SPA">
+                </div>
+                
+                <div class="filter-group">
+                    <label for="analistaFilter">Nombre de Analista:</label>
+                    <select id="analistaFilter">
+                        <option value="">Todos los analistas</option>
+                        <option value="Ximena Cortes Campaña">Ximena Cortes Campaña</option>
+                        <option value="Marianjeles Araya Garcia">Marianjeles Araya Garcia</option>
+                        <option value="Claudia Araya Perez">Claudia Araya Perez</option>
+                        <option value="Hilda Carrasco Carrasco">Hilda Carrasco Carrasco</option>
+                        <option value="Ingrid Zavala Contreras">Ingrid Zavala Contreras</option>
+                        <option value="Eleazar Ramirez Yañez">Eleazar Ramirez Yañez</option>
+                        <option value="Alexandra Berna Berna">Alexandra Berna Berna</option>
+                        <option value="Alexandra Castro Quispe">Alexandra Castro Quispe</option>
+                        <option value="Wilson Aracena Cortes">Wilson Aracena Cortes</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="button-group">
+                <button id="btnFiltrar"><i class="material-icons">search</i> Buscar</button>
+                <button id="btnReset" class="btn-secondary"><i class="material-icons">refresh</i> Limpiar Filtros</button>
+                <button id="btnMostrarTodo"><i class="material-icons">list</i> Mostrar Todo</button>
+            </div>
+        </div>
+        
+        <div class="status">
+            <div>
+                <span class="total">Total de Registros: </span>
+                <span id="totalRegistros">0</span>
+            </div>
+            <div>
+                <span class="filtered">Mostrando: </span>
+                <span id="registrosMostrados">0</span>
+            </div>
+            <div>
+                <span class="filtered">Estado: </span>
+                <span id="estadoCarga">Esperando carga de datos...</span>
+            </div>
+        </div>
+        
+        <div class="table-container">
+            <table id="tablaDatos">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Licitacion</th>
+                        <th>Proveedor</th>
+                        <th>Fecha Término Contrato</th>
+                        <th>Alerta Contrato</th>
+                        <th>Monto Adjudicado</th>
+                        <th>Saldo</th>
+                        <th>%</th>
+                        <th>Analista</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td colspan="9" class="loading">
+                            <i class="material-icons">autorenew</i>
+                            <div>Cargando datos desde Google Sheets...</div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="pagination">
+            <button id="btnAnterior" class="btn-secondary" disabled><i class="material-icons">chevron_left</i> Anterior</button>
+            <span class="pagination-info" id="paginacionInfo">Página 1 de 1</span>
+            <button id="btnSiguiente" class="btn-secondary" disabled>Siguiente <i class="material-icons">chevron_right</i></button>
+        </div>
+        
+        <p class="mobile-notice">Desliza horizontalmente para ver todas las columnas de la tabla</p>
+        
+        <button id="btnDescargar" class="btn-download">
+            <i class="material-icons">file_download</i> Descargar Datos Filtrados (CSV)
+        </button>
+    </div>
+
+    <script>
+        // Variables globales
+        let datosOriginales = [];
+        let datosFiltrados = [];
+        let paginaActual = 1;
+        const registrosPorPagina = 20;
+        
+        // IDs de Google Sheets
+        const SHEET_ID = '1SNlBb3RyV2peSJWMMSycGOFLFF_jXnY9pTWKCw0_IwM';
+        const SHEET_GID = '918715405';
+        const SHEET_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&gid=${SHEET_GID}`;
+        
+        // Cargar datos iniciales
+        document.addEventListener('DOMContentLoaded', function() {
+            // Configurar event listeners
+            document.getElementById('btnFiltrar').addEventListener('click', filtrarDatos);
+            document.getElementById('btnReset').addEventListener('click', resetFiltros);
+            document.getElementById('btnMostrarTodo').addEventListener('click', mostrarTodo);
+            document.getElementById('btnDescargar').addEventListener('click', descargarDatos);
+            document.getElementById('btnAnterior').addEventListener('click', paginaAnterior);
+            document.getElementById('btnSiguiente').addEventListener('click', paginaSiguiente);
+            
+            document.getElementById('idFilter').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') filtrarDatos();
+            });
+            
+            document.getElementById('proveedorFilter').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') filtrarDatos();
+            });
+            
+            // Cargar datos desde Google Sheets
+            cargarDatosDesdeGoogleSheets();
+        });
+
+        // Función para formatear números como pesos chilenos
+        function formatoPesosChilenos(numero) {
+            if (!numero || isNaN(numero)) return '$0';
+            return '$' + new Intl.NumberFormat('es-CL').format(Math.round(Number(numero)));
+        }
+
+        // Función para formatear porcentajes
+        function formatoPorcentaje(valor) {
+            if (!valor || isNaN(valor)) return '0%';
+            return (Number(valor) * 100).toFixed(2) + '%';
+        }
+
+        // Función para cargar datos desde Google Sheets
+        function cargarDatosDesdeGoogleSheets() {
+            document.getElementById('estadoCarga').textContent = 'Cargando datos...';
+            
+            fetch(SHEET_URL)
+                .then(response => response.text())
+                .then(data => {
+                    // Los datos de Google Sheets vienen en un formato especial
+                    const jsonData = JSON.parse(data.substring(47).slice(0, -2));
+                    const rows = jsonData.table.rows;
+                    
+                    // Procesar los datos
+                    const datosProcesados = [];
+                    
+                    // Saltar la primera fila (encabezados)
+                    for (let i = 1; i < rows.length; i++) {
+                        const row = rows[i];
+                        if (row.c && row.c.length > 0) {
+                            const dato = {
+                                ID: row.c[0] ? row.c[0].v : '',
+                                Licitacion: row.c[1] ? row.c[1].v : '',
+                                Proveedor: row.c[2] ? row.c[2].v : '',
+                                'Fecha Termino Contrato': row.c[9] ? (row.c[9].v || 'S/C') : 'S/C',
+                                'Alerta Contrato': row.c[11] ? row.c[11].v : '',
+                                'Monto Adjudicado': row.c[12] ? row.c[12].v : 0,
+                                Saldo: row.c[13] ? row.c[13].v : 0,
+                                '%': row.c[14] ? row.c[14].v : 0,
+                                Analista: row.c[17] ? row.c[17].v : ''
+                            };
+                            datosProcesados.push(dato);
+                        }
+                    }
+                    
+                    procesarDatos(datosProcesados);
+                    document.getElementById('estadoCarga').textContent = 'Carga completada';
+                })
+                .catch(error => {
+                    console.error('Error al cargar datos:', error);
+                    document.getElementById('estadoCarga').textContent = 'Error al cargar datos';
+                    mostrarError('Error al conectar con Google Sheets. Verifica la conexión e intenta nuevamente.');
+                    
+                    // Cargar datos de ejemplo en caso de error
+                    setTimeout(() => {
+                        cargarDatosDeEjemplo();
+                    }, 2000);
+                });
+        }
+        
+        // Función para cargar datos de ejemplo (en caso de error)
+        function cargarDatosDeEjemplo() {
+            const datosEjemplo = [
+                {ID: "2215-69-LQ23", Licitacion: "MANTENCIÓN PREVENTIVA Y CORRECTIVA ASCENSORES", Proveedor: "UPDOWN SPA", "Fecha Termino Contrato": "2026-02-15 00:00:00", "Alerta Contrato": "168.0", "Monto Adjudicado": "185219882", Saldo: "79112550", "%": "0.42712774215027305", Analista: "Ximena Cortes Campaña"},
+                {ID: "2215-25-LQ24", Licitacion: "SERVICIO DE ARRIENDO DE 3 MOVILES CON CONDUCTOR", Proveedor: "FOUR SERVICE SPA", "Fecha Termino Contrato": "2025-07-19 00:00:00", "Alerta Contrato": "CADUCADA", "Monto Adjudicado": "141471960", Saldo: "0", "%": "0.0", Analista: "Ximena Cortes Campaña"},
+                {ID: "2215-27-LE24", Licitacion: "ERRADICACIÓN PREVENCIÓN Y CONTROL OF PLAGAS", Proveedor: "ERNESTO EDUARDO PÉREZ FLORES", "Fecha Termino Contrato": "S/C", "Alerta Contrato": "Sin Contrato", "Monto Adjudicado": "24000000", Saldo: "0", "%": "0.0", Analista: "Ximena Cortes Campaña"},
+                {ID: "2215-18-LR23", Licitacion: "SUMINISTRO DE ROPA QUIRURGICA", Proveedor: "MADEGOM SPA", "Fecha Termino Contrato": "2026-01-05 00:00:00", "Alerta Contrato": "127.0", "Monto Adjudicado": "66773280", Saldo: "59817730", "%": "0.8958333333333334", Analista: "Marianjeles Araya Garcia"},
+                {ID: "2215-20-LP24", Licitacion: "SUMINISTRO DE PAN PARA LA UNIDAD DE ALIMENTACION", Proveedor: "LORENA VICTORIA YERE ANZA", "Fecha Termino Contrato": "2026-08-02 00:00:00", "Alerta Contrato": "336.0", "Monto Adjudicado": "98512960", Saldo: "48202021", "%": "0.48929624081948203", Analista: "Claudia Araya Perez"}
+            ];
+            
+            procesarDatos(datosEjemplo);
+            document.getElementById('estadoCarga').textContent = 'Datos de ejemplo cargados (error de conexión)';
+        }
+        
+        // Función para procesar datos
+        function procesarDatos(datos) {
+            if (!datos || datos.length === 0) {
+                mostrarError('No se encontraron datos.');
+                return;
+            }
+            
+            // Guardar datos originales
+            datosOriginales = datos;
+            datosFiltrados = [...datos];
+            
+            // Mostrar datos iniciales
+            paginaActual = 1;
+            mostrarDatosPagina();
+            
+            // Actualizar contadores
+            document.getElementById('totalRegistros').textContent = datosOriginales.length;
+            document.getElementById('registrosMostrados').textContent = datosFiltrados.length;
+        }
+        
+        // Función para mostrar datos en la tabla (paginados)
+        function mostrarDatosPagina() {
+            const tbody = document.querySelector('#tablaDatos tbody');
+            
+            // Limpiar tabla
+            tbody.innerHTML = '';
+            
+            // Calcular índices para la paginación
+            const inicio = (paginaActual - 1) * registrosPorPagina;
+            const fin = inicio + registrosPorPagina;
+            const datosPagina = datosFiltrados.slice(inicio, fin);
+            const totalPaginas = Math.ceil(datosFiltrados.length / registrosPorPagina);
+            
+            // Actualizar información de paginación
+            document.getElementById('paginacionInfo').textContent = `Página ${paginaActual} de ${totalPaginas}`;
+            
+            // Habilitar/deshabilitar botones de paginación
+            document.getElementById('btnAnterior').disabled = paginaActual <= 1;
+            document.getElementById('btnSiguiente').disabled = paginaActual >= totalPaginas;
+            
+            // Llenar datos
+            if (datosPagina.length === 0) {
+                const tr = document.createElement('tr');
+                const td = document.createElement('td');
+                td.colSpan = 9;
+                td.textContent = 'No se encontraron resultados con los filtros aplicados';
+                td.style.textAlign = 'center';
+                td.style.padding = '30px';
+                td.style.color = '#718096';
+                tr.appendChild(td);
+                tbody.appendChild(tr);
+            } else {
+                datosPagina.forEach(fila => {
+                    const tr = document.createElement('tr');
+                    
+                    // ID
+                    const tdId = document.createElement('td');
+                    tdId.textContent = fila['ID'] || '';
+                    tr.appendChild(tdId);
+                    
+                    // Licitacion
+                    const tdLicitacion = document.createElement('td');
+                    tdLicitacion.textContent = fila['Licitacion'] || '';
+                    tr.appendChild(tdLicitacion);
+                    
+                    // Proveedor
+                    const tdProveedor = document.createElement('td');
+                    tdProveedor.textContent = fila['Proveedor'] || '';
+                    tr.appendChild(tdProveedor);
+                    
+                    // Fecha Termino Contrato
+                    const tdFecha = document.createElement('td');
+                    tdFecha.textContent = fila['Fecha Termino Contrato'] || 'S/C';
+                    tr.appendChild(tdFecha);
+                    
+                    // Alerta Contrato
+                    const tdAlerta = document.createElement('td');
+                    tdAlerta.textContent = fila['Alerta Contrato'] || '';
+                    tr.appendChild(tdAlerta);
+                    
+                    // Monto Adjudicado (formateado como pesos chilenos)
+                    const tdAdjudicado = document.createElement('td');
+                    tdAdjudicado.textContent = formatoPesosChilenos(fila['Monto Adjudicado'] || '0');
+                    tdAdjudicado.style.fontFamily = 'monospace';
+                    tr.appendChild(tdAdjudicado);
+                    
+                    // Saldo (formateado como pesos chilenos)
+                    const tdSaldo = document.createElement('td');
+                    tdSaldo.textContent = formatoPesosChilenos(fila['Saldo'] || '0');
+                    tdSaldo.style.fontFamily = 'monospace';
+                    tr.appendChild(tdSaldo);
+                    
+                    // % (formateado como porcentaje)
+                    const tdPorcentaje = document.createElement('td');
+                    tdPorcentaje.textContent = formatoPorcentaje(fila['%'] || '0');
+                    tdPorcentaje.style.fontFamily = 'monospace';
+                    tr.appendChild(tdPorcentaje);
+                    
+                    // Analista
+                    const tdAnalista = document.createElement('td');
+                    tdAnalista.textContent = fila['Analista'] || '';
+                    tr.appendChild(tdAnalista);
+                    
+                    tbody.appendChild(tr);
+                });
+            }
+            
+            // Actualizar contadores
+            document.getElementById('totalRegistros').textContent = datosOriginales.length;
+            document.getElementById('registrosMostrados').textContent = datosFiltrados.length;
+        }
+        
+        // Función para filtrar datos
+        function filtrarDatos() {
+            const idValue = document.getElementById('idFilter').value.toLowerCase();
+            const proveedorValue = document.getElementById('proveedorFilter').value.toLowerCase();
+            const analistaValue = document.getElementById('analistaFilter').value;
+            
+            datosFiltrados = datosOriginales.filter(item => {
+                const coincideId = idValue === '' || 
+                                 (item['ID'] && item['ID'].toLowerCase().includes(idValue));
+                const coincideProveedor = proveedorValue === '' || 
+                                        (item['Proveedor'] && item['Proveedor'].toLowerCase().includes(proveedorValue));
+                const coincideAnalista = analistaValue === '' || item['Analista'] === analistaValue;
+                
+                return coincideId && coincideProveedor && coincideAnalista;
+            });
+            
+            paginaActual = 1;
+            mostrarDatosPagina();
+        }
+        
+        // Función para mostrar todos los datos
+        function mostrarTodo() {
+            document.getElementById('idFilter').value = '';
+            document.getElementById('proveedorFilter').value = '';
+            document.getElementById('analistaFilter').value = '';
+            
+            datosFiltrados = [...datosOriginales];
+            paginaActual = 1;
+            mostrarDatosPagina();
+        }
+        
+        // Función para restablecer filtros
+        function resetFiltros() {
+            document.getElementById('idFilter').value = '';
+            document.getElementById('proveedorFilter').value = '';
+            document.getElementById('analistaFilter').value = '';
+            
+            datosFiltrados = [...datosOriginales];
+            paginaActual = 1;
+            mostrarDatosPagina();
+        }
+        
+        // Función para ir a la página anterior
+        function paginaAnterior() {
+            if (paginaActual > 1) {
+                paginaActual--;
+                mostrarDatosPagina();
+            }
+        }
+        
+        // Función para ir a la página siguiente
+        function paginaSiguiente() {
+            const totalPaginas = Math.ceil(datosFiltrados.length / registrosPorPagina);
+            if (paginaActual < totalPaginas) {
+                paginaActual++;
+                mostrarDatosPagina();
+            }
+        }
+        
+        // Función para descargar datos
+        function descargarDatos() {
+            // Convertir a CSV
+            const encabezados = ['ID', 'Licitacion', 'Proveedor', 'Fecha Termino Contrato', 'Alerta Contrato', 'Monto Adjudicado', 'Saldo', '%', 'Analista'];
+            let csv = encabezados.join(',') + '\n';
+            
+            datosFiltrados.forEach(fila => {
+                const filaCSV = encabezados.map(encabezado => {
+                    return fila[encabezado] || '';
+                }).join(',');
+                csv += filaCSV + '\n';
+            });
+            
+            // Crear enlace de descarga
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.setAttribute('href', url);
+            link.setAttribute('download', 'licitaciones_filtradas.csv');
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+        
+        // Función para mostrar error
+        function mostrarError(mensaje) {
+            const tbody = document.querySelector('#tablaDatos tbody');
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="9" class="error">
+                        <i class="material-icons">error_outline</i>
+                        <div>${mensaje}</div>
+                    </td>
+                </tr>
+            `;
+        }
+    </script>
+</body>
+</html>
